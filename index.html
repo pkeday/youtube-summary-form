@@ -3,7 +3,7 @@
   <head>
     <title>YouTube Summary Form</title>
 
-    <!-- ✅ Load Supabase client FIRST -->
+    <!-- ✅ Load Supabase client library BEFORE any code uses it -->
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
 
     <style>
@@ -26,10 +26,11 @@
       <p id="form-response"></p>
     </form>
 
-    <!-- ✅ Wrap logic inside DOMContentLoaded to ensure order -->
+    <!-- ✅ JavaScript AFTER supabase.js is loaded -->
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const supabase = supabase.createClient(
+        // ✅ Use supabase.createClient only AFTER script is loaded
+        const supabaseClient = supabase.createClient(
           'https://fyrmvvgfixxnpfxsxdfz.supabase.co',
           'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5cm12dmdmaXh4bnBmeHN4ZGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjEyMjQsImV4cCI6MjA2NjY5NzIyNH0.ou05_RMoTiiwJwWgYB2a2c9VdJXL2DO7_YN4vTn8foA'
         );
@@ -44,7 +45,7 @@
           const chat_id = whatsapp.replace(/\+/g, "") + "@s.whatsapp.net";
 
           const responseEl = document.getElementById("form-response");
-          const { data, error } = await supabase
+          const { data, error } = await supabaseClient
             .from("registered_users")
             .insert([{ first_name, last_name, email, whatsapp_number: whatsapp, chat_id }]);
 
