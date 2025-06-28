@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>YouTube Summary Registration</title>
+    <title>YouTube Summary Form</title>
+
+    <!-- ✅ Load Supabase client FIRST -->
     <script src="https://unpkg.com/@supabase/supabase-js"></script>
+
     <style>
       body { font-family: sans-serif; padding: 2rem; max-width: 500px; margin: auto; }
       label { display: block; margin-top: 1rem; }
@@ -12,58 +15,49 @@
     </style>
   </head>
   <body>
-    <h2>Register for YouTube Summary Access</h2>
+    <h2>Register for YouTube Summary</h2>
+
     <form id="register-form">
       <label>First Name: <input type="text" id="first_name" required></label>
       <label>Last Name: <input type="text" id="last_name" required></label>
       <label>Email: <input type="email" id="email" required></label>
-      <label>WhatsApp Number (e.g. +919999999999): <input type="tel" id="whatsapp" required></label>
+      <label>WhatsApp Number: <input type="tel" id="whatsapp" required></label>
       <button type="submit">Register</button>
       <p id="form-response"></p>
     </form>
 
+    <!-- ✅ Wrap logic inside DOMContentLoaded to ensure order -->
     <script>
-      const supabase = supabase.createClient(
-        'https://fyrmvvgfixxnpfxsxdfz.supabase.co',  // ⬅️ Replace this
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5cm12dmdmaXh4bnBmeHN4ZGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjEyMjQsImV4cCI6MjA2NjY5NzIyNH0.ou05_RMoTiiwJwWgYB2a2c9VdJXL2DO7_YN4vTn8foA'                 // ⬅️ Replace this
-      );
+      document.addEventListener("DOMContentLoaded", function () {
+        const supabase = supabase.createClient(
+          'https://fyrmvvgfixxnpfxsxdfz.supabase.co',
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ5cm12dmdmaXh4bnBmeHN4ZGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTExMjEyMjQsImV4cCI6MjA2NjY5NzIyNH0.ou05_RMoTiiwJwWgYB2a2c9VdJXL2DO7_YN4vTn8foA'
+        );
 
-      document.getElementById("register-form").addEventListener("submit", async function (e) {
-        e.preventDefault();
-        const first_name = document.getElementById("first_name").value.trim();
-        const last_name = document.getElementById("last_name").value.trim();
-        const email = document.getElementById("email").value.trim().toLowerCase();
-        const whatsapp = document.getElementById("whatsapp").value.trim();
-        const responseElement = document.getElementById("form-response");
+        document.getElementById("register-form").addEventListener("submit", async function (e) {
+          e.preventDefault();
 
-        const whatsappRegex = /^\+\d{10,15}$/;
-        if (!whatsappRegex.test(whatsapp)) {
-          responseElement.textContent = "❌ Invalid WhatsApp number format.";
-          responseElement.style.color = "red";
-          return;
-        }
+          const first_name = document.getElementById("first_name").value.trim();
+          const last_name = document.getElementById("last_name").value.trim();
+          const email = document.getElementById("email").value.trim().toLowerCase();
+          const whatsapp = document.getElementById("whatsapp").value.trim();
+          const chat_id = whatsapp.replace(/\+/g, "") + "@s.whatsapp.net";
 
-        const emailRegex = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
-        if (!emailRegex.test(email)) {
-          responseElement.textContent = "❌ Invalid email format.";
-          responseElement.style.color = "red";
-          return;
-        }
+          const responseEl = document.getElementById("form-response");
+          const { data, error } = await supabase
+            .from("registered_users")
+            .insert([{ first_name, last_name, email, whatsapp_number: whatsapp, chat_id }]);
 
-        const chat_id = whatsapp.replace(/\+/g, "") + "@s.whatsapp.net";
-        const { data, error } = await supabase
-          .from("registered_users")
-          .insert([{ first_name, last_name, email, whatsapp_number: whatsapp, chat_id }]);
-
-        if (error) {
-          console.error("Supabase insert error:", error);
-          responseElement.textContent = "❌ Registration failed.";
-          responseElement.style.color = "red";
-        } else {
-          responseElement.textContent = "✅ Successfully registered!";
-          responseElement.style.color = "green";
-          document.getElementById("register-form").reset();
-        }
+          if (error) {
+            console.error("Supabase insert error:", error);
+            responseEl.textContent = "❌ Registration failed.";
+            responseEl.style.color = "red";
+          } else {
+            responseEl.textContent = "✅ Successfully registered!";
+            responseEl.style.color = "green";
+            document.getElementById("register-form").reset();
+          }
+        });
       });
     </script>
   </body>
